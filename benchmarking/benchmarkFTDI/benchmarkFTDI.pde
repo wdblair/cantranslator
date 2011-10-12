@@ -1,20 +1,23 @@
 #include <stdio.h>
 
-int messageSize = 1;
-uint8_t messageBuffer[20000];
+int baudRates[14] = {
+    115200,
+    230400,
+    460800,
+    500000,
+    576000,
+    921600,
+    1000000,
+    1152000,
+    1500000,
+    2000000};
+
+int currentBaudRateIndex = 9;
 
 void setup() {
-    Serial.begin(2000000L);
-    randomSeed(analogRead(0));
+    Serial.begin(baudRates[currentBaudRateIndex]);
 }
 
 void loop() {
-    if(Serial.available()) {
-        messageSize = Serial.read() * 20;
-        delay(100);
-        for(int i = 0; i < messageSize; i++) {
-            messageBuffer[i] = random(127);
-        }
-    }
-    Serial.write(messageBuffer, messageSize);
+    Serial.println("abcdefghijklmnopqrstuvwxyz");
 }
