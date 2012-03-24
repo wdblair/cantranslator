@@ -7,6 +7,7 @@
 #include "chipKITUSBDevice.h"
 #include "usbutil.h"
 #include "canutil.h"
+#include "canemu.h"
 
 #define NUMERICAL_SIGNAL_COUNT 11
 #define BOOLEAN_SIGNAL_COUNT 5
@@ -22,17 +23,17 @@ const int BOOLEAN_EVENT_MESSAGE_FORMAT_LENGTH = strlen(
 USBDevice usbDevice(usbCallback);
 
 char* NUMERICAL_SIGNALS[NUMERICAL_SIGNAL_COUNT] = {
-    "steering_wheel_angle",
+    "steering_wheel_angle", // 0
     "powertrain_torque",
     "engine_speed",
-    "vehicle_speed",
+    "vehicle_speed", // 3
     "accelerator_pedal_position",
     "odometer",
-    "fine_odometer_since_restart",
+    "fine_odometer_since_restart", //6
     "latitude",
     "longitude",
     "fuel_level",
-    "fuel_consumed_since_restart",
+    "fuel_consumed_since_restart", // 10
 };
 
 char* BOOLEAN_SIGNALS[BOOLEAN_SIGNAL_COUNT] = {
@@ -55,11 +56,6 @@ char* SIGNAL_STATES[STATE_SIGNAL_COUNT][3] = {
 
 char* EVENT_SIGNALS[EVENT_SIGNAL_COUNT] = {
     "door_status",
-};
-
-struct Event {
-    char* value;
-    bool event;
 };
 
 Event EVENT_SIGNAL_STATES[EVENT_SIGNAL_COUNT][3] = {
@@ -104,6 +100,29 @@ void writeEventMeasurement(char* measurementName, Event event) {
     sendMessage(&usbDevice, (uint8_t*) message, strlen(message));
 }
 
+void carStop() {
+  for (int i=0; i < NUMERICAL_SIGNAL_COUNT; i++) {
+    writeNumericalMeasurement(NUMERICAL_SIGNALS[i], 0);
+  }
+  
+  for (int j=0; j < BOOLEAN_SIGNAL_COUNT; j++) {
+    if (j > 1) { // there should be a better way to do this
+      writeBooleanMeasurement(BOOLEAN_SIGNALS[j], false);
+    }
+    else {
+      writeBooleanMeasurement(BOOLEAN_SIGNALS[j], true);
+    }
+  }
+  
+  writeStateMeasurement(STATE_SIGNALS[0],
+             SIGNAL_STATES[0][0]);
+   
+  writeStateMeasurement(STATE_SIGNALS[1],
+             SIGNAL_STATES[1][0]);
+  
+  /* events? */
+}
+
 void setup() {
     Serial.begin(115200);
     randomSeed(analogRead(0));
@@ -112,20 +131,76 @@ void setup() {
 }
 
 void loop() {
-    while(1) {
+    float lastDist = 0;
+    float lastGas = 0;
+    float lastSpeed = 0;
+    float temps = 0;
+    float delayFreq = 100;
+    
+    while(true) {
+      boolean positive;
+      if (lastSpeed > 120) {
+       random(3) == 0 ? positive = true : positive = false;
+      }
+      else if (lastSpeed < 20) {
+        random(3) == 0 ? positive = false : positive = true;
+      }
+      else if (lastSpeed == 0) {
+        positive = true;
+      }
+      else {
+        random(2) == 0 ? positive = false : positive = true;
+      }
+        
+      if(positive) {
+        lastSpeed = lastSpeed + random(2);
+      }
+      else {
+        lastSpeed = lastSpeed - random(2);
+      }
+      
+      float temp = lastSpeed * ((delayFreq/1000)/3600);
+      lastDist = lastDist + temp;
+      writeNumericalMeasurement(NUMERICAL_SIGNALS[3], lastSpeed); // FIXME, these should not be hardcoded
+      writeNumericalMeasurement(NUMERICAL_SIGNALS[6], lastDist);
+      
+      temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
+      lastGas = lastGas + temp;
+      writeNumericalMeasurement(NUMERICAL_SIGNALS[10], lastGas);
+      
+      int randChoice = random(NUMERICAL_SIGNAL_COUNT);
+      if (randChoice == 3) {}
+      else if (randChoice == 6) {}
+      else if (randChoice == 10) {}
+      
+      else {   
         writeNumericalMeasurement(
-                NUMERICAL_SIGNALS[random(NUMERICAL_SIGNAL_COUNT)],
-                random(101) + random(100) * .1);
-        writeBooleanMeasurement(BOOLEAN_SIGNALS[random(BOOLEAN_SIGNAL_COUNT)],
+                  NUMERICAL_SIGNALS[randChoice],
+                  random(101) + random(100) * .1);
+      }
+            
+      writeBooleanMeasurement(BOOLEAN_SIGNALS[random(BOOLEAN_SIGNAL_COUNT)],
                 random(2) == 1 ? true : false);
-
-        int stateSignalIndex = random(STATE_SIGNAL_COUNT);
+                
+      int stateSignalIndex = random(STATE_SIGNAL_COUNT);
+      if (STATE_SIGNALS[stateSignalIndex] == "ignition_status") {
+        if (millis() > 300000) {
+          int rand = random(1000);
+          if (rand == 1) { // and we close. everything.
+            carStop();
+            break;
+          }
+        }
+      }
+      
+      else {
         writeStateMeasurement(STATE_SIGNALS[stateSignalIndex],
                 SIGNAL_STATES[stateSignalIndex][random(3)]);
-
-        int eventSignalIndex = random(EVENT_SIGNAL_COUNT);
-        writeEventMeasurement(EVENT_SIGNALS[eventSignalIndex],
-                EVENT_SIGNAL_STATES[eventSignalIndex][random(3)]);
+      }
+      
+      int eventSignalIndex = random(EVENT_SIGNAL_COUNT);
+      writeEventMeasurement(EVENT_SIGNALS[eventSignalIndex],
+              EVENT_SIGNAL_STATES[eventSignalIndex][random(3)]);
     }
 }
 
