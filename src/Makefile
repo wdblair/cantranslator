@@ -37,5 +37,4 @@ endif
 
 include tests/tests.mk
 
-clean::
-	rm -rf $(OBJDIR_ROOT)/*
+.PHONY: force

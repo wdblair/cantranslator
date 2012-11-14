@@ -64,11 +64,11 @@ gdb: all
 .s.o:
 	$(AS) $(AS_FLAGS) -o $@ $<
 
-$(OBJDIR)/%.o: %.c
+$(OBJDIR)/%.o: %.c c_flags
 	@mkdir -p $(dir $@)
 	$(CC) $(CC_FLAGS) $(CC_SYMBOLS) $(ONLY_C_FLAGS) $(INCLUDE_PATHS) -o $@ $<
 
-$(OBJDIR)/%.o: %.cpp
+$(OBJDIR)/%.o: %.cpp cpp_flags
 	@mkdir -p $(dir $@)
 	$(CPP) $(CC_FLAGS) $(CC_SYMBOLS) $(ONLY_CPP_FLAGS) $(INCLUDE_PATHS) -o $@ $<
 
@@ -77,3 +77,12 @@ $(TARGET_ELF): $(OBJECTS)
 
 $(TARGET_BIN): $(TARGET_ELF)
 	$(OBJCOPY) -O binary $< $@
+
+.flags.c: force
+	echo '$(CFLAGS)' | cmp -s - $@ || echo '$(CFLAGS)' > $@
+
+.flags.cpp: force
+	echo '$(CPPFLAGS)' | cmp -s - $@ || echo '$(CPPFLAGS)' > $@
+
+clean::
+	rm -rf $(OBJDIR_ROOT)/*
