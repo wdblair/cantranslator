@@ -62,30 +62,27 @@ Event EVENT_SIGNAL_STATES[EVENT_SIGNAL_COUNT][3] = {
 
 void carStop() {
   for (int i=0; i < NUMERICAL_SIGNAL_COUNT; i++) {
-    writeNumericalMeasurement(NUMERICAL_SIGNALS[i], 0);
+    sendNumericalMessage(NUMERICAL_SIGNALS[i], 0, &listener);
   }
 
   for (int j=0; j < BOOLEAN_SIGNAL_COUNT; j++) {
     if (j > 1) { // there should be a better way to do this
-      writeBooleanMeasurement(BOOLEAN_SIGNALS[j], false);
+      sendBooleanMessage(BOOLEAN_SIGNALS[j], false, &listener);
     }
     else {
-      writeBooleanMeasurement(BOOLEAN_SIGNALS[j], true);
+      sendBooleanMessage(BOOLEAN_SIGNALS[j], true, &listener);
     }
   }
 
-  writeStateMeasurement(STATE_SIGNALS[0],
-             SIGNAL_STATES[0][0]);
+  sendStringMessage(STATE_SIGNALS[0], SIGNAL_STATES[0][0], &listener);
 
-  writeStateMeasurement(STATE_SIGNALS[1],
-             SIGNAL_STATES[1][0]);
+  sendStringMessage(STATE_SIGNALS[1], SIGNAL_STATES[1][0], &listener);
 
   /* events? */
 }
 
 void carStart() {
-  writeStateMeasurement(STATE_SIGNALS[1],
-             SIGNAL_STATES[1][1]);
+  sendStringMessage(STATE_SIGNALS[1], SIGNAL_STATES[1][1], &listener);
 }
 
 void setup() {
@@ -141,7 +138,7 @@ void loop() {
         float temp = lastSpeed * ((delayFreq/1000)/3600);
         lastDist = lastDist + temp;
         sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
-        sendNumericalMesasge(NUMERICAL_SIGNALS[6], lastDist, &listener);
+        sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
 
         temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
         lastGas = lastGas + temp;
@@ -152,10 +149,6 @@ void loop() {
                 rand() % 50 + rand() % 100 * .1, &listener);
         sendBooleanMessage(BOOLEAN_SIGNALS[rand() % BOOLEAN_SIGNAL_COUNT],
                 rand() % 2 == 1 ? true : false, &listener);
-
-        int stateSignalIndex = rand() % STATE_SIGNAL_COUNT;
-        sendStringMessage(STATE_SIGNALS[stateSignalIndex],
-                SIGNAL_STATES[stateSignalIndex][rand() % 3], &listener);
 
         int eventSignalIndex = rand() % EVENT_SIGNAL_COUNT;
         Event randomEvent = EVENT_SIGNAL_STATES[eventSignalIndex][rand() % 3];
