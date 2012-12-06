@@ -7,3 +7,6 @@ build-cli
 release/
 .DS_Store
 *.pyc
+*.gpx
+*~
+*.o
