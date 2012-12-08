@@ -76,21 +76,20 @@ bool usbWriteStub(uint8_t* buffer) {
 }
 
 void loop() {
-    while(1) {
-        sendNumericalMessage(
-                NUMERICAL_SIGNALS[rand() % NUMERICAL_SIGNAL_COUNT],
-                rand() % 50 + rand() % 100 * .1, &listener);
-        sendBooleanMessage(BOOLEAN_SIGNALS[rand() % BOOLEAN_SIGNAL_COUNT],
-                rand() % 2 == 1 ? true : false, &listener);
-
-        int stateSignalIndex = rand() % STATE_SIGNAL_COUNT;
-        sendStringMessage(STATE_SIGNALS[stateSignalIndex],
-                SIGNAL_STATES[stateSignalIndex][rand() % 3], &listener);
-
-        int eventSignalIndex = rand() % EVENT_SIGNAL_COUNT;
-        Event randomEvent = EVENT_SIGNAL_STATES[eventSignalIndex][rand() % 3];
-        sendEventedBooleanMessage(EVENT_SIGNALS[eventSignalIndex],
-                randomEvent.value, randomEvent.event, &listener);
+    for(int i = 0; i < 100000000000000; i++) {
+        if(i == 2000000) {
+            sendBooleanMessage(BOOLEAN_SIGNALS[0], true, &listener);
+        } else if(i == 3000000) {
+            sendBooleanMessage(BOOLEAN_SIGNALS[0], false, &listener);
+        } else if(i == 4000000) {
+            sendBooleanMessage(BOOLEAN_SIGNALS[1], true, &listener);
+        } else if(i == 5000000) {
+            sendBooleanMessage(BOOLEAN_SIGNALS[1], true, &listener);
+        } else if(i == 6000000) {
+            sendBooleanMessage(BOOLEAN_SIGNALS[1], true, &listener);
+        } else if(i == 7000000) {
+            sendBooleanMessage(BOOLEAN_SIGNALS[1], true, &listener);
+        }
 
         processListenerQueues(&listener);
         readFromHost(&USB_DEVICE, usbWriteStub);
