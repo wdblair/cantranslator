@@ -202,8 +202,8 @@ class Parser(object):
         print("#include \"canwrite.h\"")
         print("#include \"signals.h\"")
         print("#include \"log.h\"")
-        print("#include \"handlers.h\"")
-        print("#include \"shared_handlers.h\"")
+        if getattr(self, 'uses_custom_handlers', None):
+            print("#include \"handlers.h\"")
         print()
         print("extern Listener listener;")
         print()
@@ -224,8 +224,12 @@ class Parser(object):
         valid = True
         for bus in list(self.buses.values()):
             for message in bus['messages']:
+                if message.handler is not None:
+                    self.uses_custom_handlers = True
                 for signal in message.signals:
                     valid = valid and signal.validate()
+                    if signal.handler is not None:
+                        self.uses_custom_handlers = True
         return valid
 
     def validate_name(self):
@@ -233,6 +237,13 @@ class Parser(object):
             sys.stderr.write("ERROR: missing message set (%s)" % self.name)
             return False
         return True
+
+    def _print_bus_struct(self, bus_address, bus, bus_number):
+        print("    { %d, %s, can%d, " % (bus['speed'], bus_address, bus_number))
+        print("#ifdef __PIC32__")
+        print("        handleCan%dInterrupt," % bus_number)
+        print("#endif // __PIC32__")
+        print("    },")
 
     def print_source(self):
         if not self.validate_messages() or not self.validate_name():
@@ -242,14 +253,14 @@ class Parser(object):
 
         print("const int CAN_BUS_COUNT = %d;" % len(self.buses))
         print("CanBus CAN_BUSES[CAN_BUS_COUNT] = {")
-        for i, bus in enumerate(iter(self.buses.items())):
-            bus_number = i + 1
-            print("    { %d, %s, can%d," % (
-                    bus[1]['speed'], bus[0], bus_number))
-            print("#ifdef __PIC32__")
-            print("        handleCan%dInterrupt," % bus_number)
-            print("#endif // __PIC32__")
-            print("    },")
+        # Only works with 2 CAN buses since we are limited by 2 CAN controllers,
+        # and we want to be a little careful that we always expect 0x101 to be
+        # plugged into the CAN1 controller and 0x102 into CAN2.
+        for bus_number, bus_address in enumerate(("0x101", "0x102")):
+            bus = self.buses.get(bus_address, None)
+            if bus is not None:
+                self._print_bus_struct(bus_address, bus, bus_number + 1)
+
         print("};")
         print()
 
@@ -349,6 +360,10 @@ class Parser(object):
                                     % signal.name))
                 print("        break;")
         print("    }")
+
+        if self._message_count() == 0:
+            print("    passthroughCanMessage(&listener, id, data);")
+
         print("}\n")
 
         # Create a set of filters.
@@ -356,14 +371,15 @@ class Parser(object):
         print()
         print("#endif // CAN_EMULATOR")
 
+    def _message_count(self):
+        return sum((len(bus['messages']) for bus in list(self.buses.values())))
+
     def print_filters(self):
         # These arrays can't be initialized when we create the variables or else
         # they end up in the .data portion of the compiled program, and it
         # becomes too big for the microcontroller. Initializing them at runtime
         # gets around that problem.
-        message_count = sum((len(bus['messages'])
-                for bus in list(self.buses.values())))
-        print("CanFilter FILTERS[%d];" % message_count)
+        print("CanFilter FILTERS[%d];" % self._message_count())
 
         print()
         print("CanFilter* initializeFilters(uint64_t address, int* count) {")

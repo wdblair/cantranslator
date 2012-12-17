@@ -19,13 +19,26 @@ ifdef NO_UART
 SYMBOLS += NO_UART
 endif
 
-CC_SYMBOLS = $(addprefix -D,$(SYMBOLS))
-
-ifndef BOARD
-BOARD = PIC32
+ifdef TRANSMITTER
+SYMBOLS += TRANSMITTER
 endif
 
-ifeq ($(BOARD), PIC32)
+CC_SYMBOLS = $(addprefix -D,$(SYMBOLS))
+
+CJSON_EXISTS = $(shell test -e libs/cJSON/cJSON.h; echo $$?)
+ifneq ($(CJSON_EXISTS),0)
+$(error cJSON dependency is missing - did you run "git submodule init && git submodule update"?)
+endif
+
+# Valid BOARD options:
+# 	CHIPKIT
+# 	BLUEBOARD
+# 	FORD
+ifndef BOARD
+BOARD = CHIPKIT
+endif
+
+ifeq ($(BOARD), CHIPKIT)
 include pic32/pic32.mk
 else
 include lpc17xx/lpc17xx.mk

@@ -52,7 +52,8 @@ typedef struct {
  *
  * number - The ID of this filter, e.g. 0, 1, 2.
  * value - The filter's value.
- * channel - The CAN channel this filter should be applied to.
+ * channel - The CAN channel this filter should be applied to - on the PIC32,
+ *           channel 1 is for RX.
  */
 typedef struct {
     int number;
@@ -126,13 +127,15 @@ typedef struct CanSignal CanSignal;
  * name - the name field in the message received over USB.
  * value - the value of the message, parsed by the cJSON library and able to be
  *         read as a string, boolean, float or int.
+ * event - an optional event, may be null if the OpenXC message didn't include
+ *          it.
  * signals - The list of all signals.
  * signalCount - The length of the signals array.
  *
  * Returns true if the command caused something to be sent over CAN.
  */
-typedef bool (*CommandHandler)(const char* name, cJSON* value, CanSignal* signals,
-        int signalCount);
+typedef bool (*CommandHandler)(const char* name, cJSON* value, cJSON* event,
+        CanSignal* signals, int signalCount);
 
 /* Public: A command to read from USB and possibly write back to CAN.
  *
