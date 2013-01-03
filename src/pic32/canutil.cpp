@@ -44,10 +44,7 @@ void configureFilters(CanBus* bus, CanFilter* filters, int filterCount) {
 }
 
 void initializeCan(CanBus* bus) {
-    debug("Initializing CAN...");
-    QUEUE_INIT(CanMessage, &bus->receiveQueue);
-    QUEUE_INIT(CanMessage, &bus->sendQueue);
-
+    initializeCanCommon(bus);
     // Switch the CAN module ON and switch it to Configuration mode. Wait till
     // the switch is complete
     CAN_CONTROLLER(bus)->enableModule(true);
