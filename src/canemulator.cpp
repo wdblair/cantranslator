@@ -98,11 +98,6 @@ float startingTime;
 
 void setup() {
     srand(42);
-
-    initializeLogging();
-    initializeUsb(listener.usb);
-    initializeSerial(listener.serial);
-    initializeEthernet(listener.ethernet);
     startingTime = millis();
     carStart();
 }
