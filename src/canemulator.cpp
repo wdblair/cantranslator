@@ -100,24 +100,23 @@ float lastSpeed = 0;
 float temps = 0;
 float delayFreq = 100;
 float targetSpeed = 50;
-unsigned long timeAtEachSpeed = 30000;  //In milliseconds.
+unsigned long timeAtEachSpeed = 10000;  //In milliseconds.
 unsigned long timeForSpeedChange;
 bool cruising = false;
 unsigned long nextUpdate = 1000;
+float acceleration = 80.0/800;  //In kph per 100th of a second.
 
 void loop() {
     while (millis() < nextUpdate) {}
  
     nextUpdate += 10;
 
-    float accelerationSign;
-    if(targetSpeed > lastSpeed) {
-      accelerationSign = 1;
-    } else {
-      accelerationSign = -1;
+    float signedAcceleration= acceleration;
+    if(targetSpeed < lastSpeed) {
+      signedAcceleration *= -1;
     }
     
-    lastSpeed = lastSpeed + (random(3) * accelerationSign);
+    lastSpeed = lastSpeed + signedAcceleration;
     
     if (cruising) {
       //We're cruising at targetSpeed.
@@ -159,8 +158,13 @@ void loop() {
     lastGas = lastGas + temp;
     sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
     
+    long randomNumerical;
+    do {
+      randomNumerical =  random(NUMERICAL_SIGNAL_COUNT);
+    } while ((randomNumerical == 3) || (randomNumerical == 6) || (randomNumerical == 10));
+
     sendNumericalMessage(
-                         NUMERICAL_SIGNALS[rand() % NUMERICAL_SIGNAL_COUNT],
+                         NUMERICAL_SIGNALS[randomNumerical],
                          rand() % 50 + rand() % 100 * .1, &listener);
     sendBooleanMessage(BOOLEAN_SIGNALS[rand() % BOOLEAN_SIGNAL_COUNT],
                        rand() % 2 == 1 ? true : false, &listener);
