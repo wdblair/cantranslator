@@ -84,6 +84,18 @@ void carStart() {
   sendStringMessage(STATE_SIGNALS[1], SIGNAL_STATES[1][1], &listener);
 }
 
+bool usbWriteStub(uint8_t* buffer) {
+    debug("Ignoring write request -- running an emulator\r\n");
+    return true;
+}
+
+float lastDist = 0;
+float lastGas = 0;
+float lastSpeed = 0;
+float temps = 0;
+float delayFreq = 100;
+float startingTime;
+
 void setup() {
     srand(42);
 
@@ -91,73 +103,60 @@ void setup() {
     initializeUsb(listener.usb);
     initializeSerial(listener.serial);
     initializeEthernet(listener.ethernet);
-}
-
-bool usbWriteStub(uint8_t* buffer) {
-    debug("Ignoring write request -- running an emulator\r\n");
-    return true;
+    startingTime = millis();
+    carStart();
 }
 
 void loop() {
-    float lastDist = 0;
-    float lastGas = 0;
-    float lastSpeed = 0;
-    float temps = 0;
-    float delayFreq = 100;
+    if (millis() > startingTime + 30000) {
+        carStop();
+        carStart();
+        return;
+    }
 
-    carStart();
-    float startingTime = millis();
-    while(1) {
-        if (millis() > startingTime + 30000) {
-            carStop();
-            carStart();
-            break;
-        }
+    bool positive;
+    if (lastSpeed > 120) {
+        random(3) == 0 ? positive = true : positive = false;
+    }
+    else if (lastSpeed < 20) {
+        random(3) == 0 ? positive = false : positive = true;
+    }
+    else if (lastSpeed == 0) {
+        positive = true;
+    }
+    else {
+        random(2) == 0 ? positive = false : positive = true;
+    }
 
-        bool positive;
-        if (lastSpeed > 120) {
-            random(3) == 0 ? positive = true : positive = false;
-        }
-        else if (lastSpeed < 20) {
-            random(3) == 0 ? positive = false : positive = true;
-        }
-        else if (lastSpeed == 0) {
-            positive = true;
-        }
-        else {
-            random(2) == 0 ? positive = false : positive = true;
-        }
+    if(positive) {
+        lastSpeed = lastSpeed + random(2);
+    }
+    else {
+        lastSpeed = lastSpeed - random(2);
+    }
 
-        if(positive) {
-            lastSpeed = lastSpeed + random(2);
-        }
-        else {
-            lastSpeed = lastSpeed - random(2);
-        }
+    float temp = lastSpeed * ((delayFreq/1000)/3600);
+    lastDist = lastDist + temp;
+    sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
+    sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
 
-        float temp = lastSpeed * ((delayFreq/1000)/3600);
-        lastDist = lastDist + temp;
-        sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
-        sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
+    temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
+    lastGas = lastGas + temp;
+    sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
 
-        temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
-        lastGas = lastGas + temp;
-        sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
+    sendNumericalMessage(
+            NUMERICAL_SIGNALS[rand() % NUMERICAL_SIGNAL_COUNT],
+            rand() % 50 + rand() % 100 * .1, &listener);
+    sendBooleanMessage(BOOLEAN_SIGNALS[rand() % BOOLEAN_SIGNAL_COUNT],
+            rand() % 2 == 1 ? true : false, &listener);
 
-        sendNumericalMessage(
-                NUMERICAL_SIGNALS[rand() % NUMERICAL_SIGNAL_COUNT],
-                rand() % 50 + rand() % 100 * .1, &listener);
-        sendBooleanMessage(BOOLEAN_SIGNALS[rand() % BOOLEAN_SIGNAL_COUNT],
-                rand() % 2 == 1 ? true : false, &listener);
-
-        int eventSignalIndex = rand() % EVENT_SIGNAL_COUNT;
-        Event randomEvent = EVENT_SIGNAL_STATES[eventSignalIndex][rand() % 3];
-        sendEventedBooleanMessage(EVENT_SIGNALS[eventSignalIndex],
-                randomEvent.value, randomEvent.event, &listener);
+    int eventSignalIndex = rand() % EVENT_SIGNAL_COUNT;
+    Event randomEvent = EVENT_SIGNAL_STATES[eventSignalIndex][rand() % 3];
+    sendEventedBooleanMessage(EVENT_SIGNALS[eventSignalIndex],
+            randomEvent.value, randomEvent.event, &listener);
 
     readFromHost(listener.usb, usbWriteStub);
     readFromSerial(listener.serial, usbWriteStub);
-    }
 }
 
 void reset() { }
