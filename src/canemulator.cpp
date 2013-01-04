@@ -100,11 +100,11 @@ float lastSpeed = 0;
 float temps = 0;
 float delayFreq = 100;
 float targetSpeed = 50;
-unsigned long timeAtEachSpeed = 10000;  //In milliseconds.
+unsigned long timeAtEachSpeed = 7000;  //In milliseconds.
 unsigned long timeForSpeedChange;
 bool cruising = false;
 unsigned long nextUpdate = 1000;
-float acceleration = 80.0/800;  //In kph per 100th of a second.
+float acceleration = 80.0/400;  //In kph per 100th of a second.
 
 void loop() {
     while (millis() < nextUpdate) {}
