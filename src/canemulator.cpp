@@ -149,7 +149,7 @@ void loop() {
       }
     }
 
-    float temp = lastSpeed * ((delayFreq/1000)/3600);
+    float temp = lastSpeed / 360;  //kph * 1000m / 60 min / 60 sec / 100 packets/s.
     lastDist = lastDist + temp;
     sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
