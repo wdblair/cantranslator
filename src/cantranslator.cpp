@@ -11,10 +11,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifdef __PIC32__
-#include "chipKITEthernet.h"
-#endif // __PIC32__
-
 extern Listener listener;
 
 /* Forward declarations */
@@ -34,12 +30,8 @@ void setup() {
 #endif // TRANSMITTER
 
     initializeUsb(listener.usb);
-    if(listener.serial != NULL) {
-        initializeSerial(listener.serial);
-    }
-    if(listener.ethernet != NULL) {
-        initializeEthernet(listener.ethernet);
-    }
+    initializeSerial(listener.serial);
+    initializeEthernet(listener.ethernet);
     initializeAllCan();
 }
 
@@ -49,12 +41,8 @@ void loop() {
     }
 
     readFromHost(listener.usb, &receiveWriteRequest);
-    if(listener.serial != NULL) {
-        readFromSerial(listener.serial, receiveWriteRequest);
-    }
-    if(listener.ethernet != NULL) {
-        readFromSocket(listener.ethernet, &receiveWriteRequest);
-    }
+    readFromSerial(listener.serial, receiveWriteRequest);
+    readFromSocket(listener.ethernet, &receiveWriteRequest);
 
     for(int i = 0; i < getCanBusCount(); i++) {
         processCanWriteQueue(&getCanBuses()[i]);
