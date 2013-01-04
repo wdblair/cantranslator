@@ -152,6 +152,7 @@ void loop() {
     float temp = lastSpeed / 360;  //kph * 1000m / 60 min / 60 sec / 100 packets/s.
     lastDist = lastDist + temp;
     sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
+    sendNumericalMessage(NUMERICAL_SIGNALS[5], lastDist, &listener);
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
     
     temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
@@ -161,7 +162,8 @@ void loop() {
     long randomNumerical;
     do {
       randomNumerical =  random(NUMERICAL_SIGNAL_COUNT);
-    } while ((randomNumerical == 3) || (randomNumerical == 6) || (randomNumerical == 10));
+    } while ((randomNumerical == 3) || (randomNumerical == 5) || 
+             (randomNumerical == 6) || (randomNumerical == 10));
 
     sendNumericalMessage(
                          NUMERICAL_SIGNALS[randomNumerical],
