@@ -89,11 +89,6 @@ bool usbWriteStub(uint8_t* buffer) {
     return true;
 }
 
-void setup() {
-    srand(42);
-    carStart();
-}
-
 float lastDist = 0;
 float lastGas = 0;
 float lastSpeed = 0;
@@ -106,18 +101,23 @@ bool cruising = false;
 unsigned long nextUpdate = 1000;
 float acceleration = 80.0/400;  //In kph per 100th of a second.
 
+void setup() {
+    srand(42);
+    carStart();
+}
+
 void loop() {
     while (millis() < nextUpdate) {}
- 
+
     nextUpdate += 10;
 
     float signedAcceleration= acceleration;
     if(targetSpeed < lastSpeed) {
       signedAcceleration *= -1;
     }
-    
+
     lastSpeed = lastSpeed + signedAcceleration;
-    
+
     if (cruising) {
       //We're cruising at targetSpeed.
       if (millis() > timeForSpeedChange) {
@@ -154,11 +154,11 @@ void loop() {
     sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
     sendNumericalMessage(NUMERICAL_SIGNALS[5], lastDist, &listener);
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
-    
+
     temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
     lastGas = lastGas + temp;
     sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
-    
+
     long randomNumerical;
     do {
       randomNumerical =  random(NUMERICAL_SIGNAL_COUNT);
