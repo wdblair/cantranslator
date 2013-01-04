@@ -89,66 +89,86 @@ bool usbWriteStub(uint8_t* buffer) {
     return true;
 }
 
+void setup() {
+    srand(42);
+    carStart();
+}
+
 float lastDist = 0;
 float lastGas = 0;
 float lastSpeed = 0;
 float temps = 0;
 float delayFreq = 100;
-float startingTime;
-
-void setup() {
-    srand(42);
-    startingTime = millis();
-    carStart();
-}
+float targetSpeed = 50;
+unsigned long timeAtEachSpeed = 30000;  //In milliseconds.
+unsigned long timeForSpeedChange;
+bool cruising = false;
+unsigned long nextUpdate = 1000;
 
 void loop() {
-    if (millis() > startingTime + 30000) {
-        carStop();
-        carStart();
-        return;
-    }
+    while (millis() < nextUpdate) {}
+ 
+    nextUpdate += 10;
 
-    bool positive;
-    if (lastSpeed > 120) {
-        random(3) == 0 ? positive = true : positive = false;
+    float accelerationSign;
+    if(targetSpeed > lastSpeed) {
+      accelerationSign = 1;
+    } else {
+      accelerationSign = -1;
     }
-    else if (lastSpeed < 20) {
-        random(3) == 0 ? positive = false : positive = true;
-    }
-    else if (lastSpeed == 0) {
-        positive = true;
-    }
-    else {
-        random(2) == 0 ? positive = false : positive = true;
-    }
-
-    if(positive) {
-        lastSpeed = lastSpeed + random(2);
-    }
-    else {
-        lastSpeed = lastSpeed - random(2);
+    
+    lastSpeed = lastSpeed + (random(3) * accelerationSign);
+    
+    if (cruising) {
+      //We're cruising at targetSpeed.
+      if (millis() > timeForSpeedChange) {
+        //We've cruised at this speed long enough.  Time to change it up.
+        cruising = false;
+        int newSpeed = random(3);
+        switch(newSpeed) {
+        case 0:
+          targetSpeed = 50;  //A little more than 30mph.
+          break;
+        case 1:
+          targetSpeed = 80;  //50mph.
+          break;
+        case 2:
+          targetSpeed = 120;  //75mph.
+          break;
+        default:
+          //Shouldn't've gotten here.  Hrm.
+          targetSpeed = 144;  //90mph.
+          break;
+        }
+      }
+    } else {
+      //We haven't reached targetSpeed.
+      if (abs(lastSpeed - targetSpeed) <= 2) {
+        //We've reached targetSpeed!
+        timeForSpeedChange = millis() + timeAtEachSpeed;
+        cruising = true;
+      }
     }
 
     float temp = lastSpeed * ((delayFreq/1000)/3600);
     lastDist = lastDist + temp;
     sendNumericalMessage(NUMERICAL_SIGNALS[3], lastSpeed, &listener); // FIXME, these should not be hardcoded
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
-
+    
     temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
     lastGas = lastGas + temp;
     sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
-
+    
     sendNumericalMessage(
-            NUMERICAL_SIGNALS[rand() % NUMERICAL_SIGNAL_COUNT],
-            rand() % 50 + rand() % 100 * .1, &listener);
+                         NUMERICAL_SIGNALS[rand() % NUMERICAL_SIGNAL_COUNT],
+                         rand() % 50 + rand() % 100 * .1, &listener);
     sendBooleanMessage(BOOLEAN_SIGNALS[rand() % BOOLEAN_SIGNAL_COUNT],
-            rand() % 2 == 1 ? true : false, &listener);
+                       rand() % 2 == 1 ? true : false, &listener);
 
     int eventSignalIndex = rand() % EVENT_SIGNAL_COUNT;
     Event randomEvent = EVENT_SIGNAL_STATES[eventSignalIndex][rand() % 3];
     sendEventedBooleanMessage(EVENT_SIGNALS[eventSignalIndex],
-            randomEvent.value, randomEvent.event, &listener);
+                              randomEvent.value, randomEvent.event, &listener);
 
     readFromHost(listener.usb, usbWriteStub);
     readFromSerial(listener.serial, usbWriteStub);
