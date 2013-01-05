@@ -95,7 +95,7 @@ float lastSpeed = 0;
 float temps = 0;
 float delayFreq = 100;
 float targetSpeed = 50;
-unsigned long timeAtEachSpeed = 7000;  //In milliseconds.
+unsigned long timeAtEachSpeed = 2000;  //In milliseconds.
 unsigned long timeForSpeedChange;
 bool cruising = false;
 unsigned long nextUpdate = 1000;
@@ -123,6 +123,11 @@ void loop() {
       if (millis() > timeForSpeedChange) {
         //We've cruised at this speed long enough.  Time to change it up.
         cruising = false;
+        targetSpeed += 30;
+        if(targetSpeed > 120) {
+          targetSpeed = 50;
+        }
+        /*
         int newSpeed = random(3);
         switch(newSpeed) {
         case 0:
@@ -139,10 +144,11 @@ void loop() {
           targetSpeed = 144;  //90mph.
           break;
         }
+        */
       }
     } else {
       //We haven't reached targetSpeed.
-      if (abs(lastSpeed - targetSpeed) <= 2) {
+      if (abs(lastSpeed - targetSpeed) <= 2.0) {
         //We've reached targetSpeed!
         timeForSpeedChange = millis() + timeAtEachSpeed;
         cruising = true;
