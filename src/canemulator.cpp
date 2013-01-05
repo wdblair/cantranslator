@@ -93,7 +93,7 @@ float lastDist = 0;
 float lastGas = 0;
 float lastSpeed = 0;
 float temps = 0;
-float delayFreq = 100;
+float dataFreq = 100;
 float targetSpeed = 50;
 unsigned long timeAtEachSpeed = 2000;  //In milliseconds.
 unsigned long timeForSpeedChange;
@@ -111,7 +111,7 @@ void loop() {
 
     nextUpdate += 10;
 
-    float signedAcceleration= acceleration;
+    float signedAcceleration = acceleration;
     if(targetSpeed < lastSpeed) {
       signedAcceleration *= -1;
     }
@@ -124,7 +124,7 @@ void loop() {
         //We've cruised at this speed long enough.  Time to change it up.
         cruising = false;
         targetSpeed += 30;
-        if(targetSpeed > 120) {
+        if(targetSpeed > 130) {
           targetSpeed = 50;
         }
         /*
@@ -161,8 +161,17 @@ void loop() {
     sendNumericalMessage(NUMERICAL_SIGNALS[5], lastDist, &listener);
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
 
-    temp = random(3) * (0.001 * (delayFreq/1000)); // This is probably wrong
-    lastGas = lastGas + temp;
+    //Gas is calculated with three constants that have no basis in experimentation or reality.
+#define IDLE_FUEL 0.0001   //Fuel spent just running the engine.
+#define SPEED_FUEL 0.0001  //Fuel burned to fight air drag and road friction.
+#define ACC_FUEL 0.0001    //Fuel burned to accelerate the car
+
+    lastGas += IDLE_FUEL;
+    if (signedAcceleration > 0) {
+      lastGas += SPEED_FUEL * lastSpeed;  //We're fighting drag
+      lastGas += ACC_FUEL;  //And we're adding momentum to the car.
+    }  //else, we're not accelerating, and we're letting drag slow the car.
+
     sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
 
     long randomNumerical;
