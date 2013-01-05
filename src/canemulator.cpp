@@ -95,7 +95,7 @@ float lastSpeed = 0;
 float temps = 0;
 float dataFreq = 100;
 float targetSpeed = 50;
-unsigned long timeAtEachSpeed = 2000;  //In milliseconds.
+unsigned long timeAtEachSpeed = 7000;  //In milliseconds.
 unsigned long timeForSpeedChange;
 bool cruising = false;
 unsigned long nextUpdate = 1000;
@@ -162,13 +162,13 @@ void loop() {
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
 
     //Gas is calculated with three constants that have no basis in experimentation or reality.
-#define IDLE_FUEL 0.0001   //Fuel spent just running the engine.
-#define SPEED_FUEL 0.0001  //Fuel burned to fight air drag and road friction.
-#define ACC_FUEL 0.0001    //Fuel burned to accelerate the car
+#define IDLE_FUEL  0.000001   //Fuel spent just running the engine.
+#define SPEED_FUEL 0.0000000001  //Fuel burned to fight air drag and road friction.
+#define ACC_FUEL 0.00001    //Fuel burned to accelerate the car
 
     lastGas += IDLE_FUEL;
     if (signedAcceleration > 0) {
-      lastGas += SPEED_FUEL * lastSpeed;  //We're fighting drag
+      lastGas += SPEED_FUEL * lastSpeed * lastSpeed * lastSpeed;  //We're fighting drag
       lastGas += ACC_FUEL;  //And we're adding momentum to the car.
     }  //else, we're not accelerating, and we're letting drag slow the car.
 
