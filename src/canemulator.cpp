@@ -99,7 +99,7 @@ unsigned long timeAtEachSpeed = 7000;  //In milliseconds.
 unsigned long timeForSpeedChange;
 bool cruising = false;
 unsigned long nextUpdate = 1000;
-float acceleration = 80.0/400;  //In kph per 100th of a second.
+float acceleration = 0.2;  //In kph per 100th of a second.
 
 void setup() {
     srand(42);
@@ -112,7 +112,9 @@ void loop() {
     nextUpdate += 10;
 
     float signedAcceleration = acceleration;
-    if(targetSpeed < lastSpeed) {
+    if (abs(lastSpeed - targetSpeed) <= 2.0) {
+      signedAcceleration = 0;
+    } else if(targetSpeed < lastSpeed) {
       signedAcceleration *= -1;
     }
 
@@ -162,15 +164,17 @@ void loop() {
     sendNumericalMessage(NUMERICAL_SIGNALS[6], lastDist, &listener);
 
     //Gas is calculated with three constants that have no basis in experimentation or reality.
-#define IDLE_FUEL  0.000001   //Fuel spent just running the engine.
-#define SPEED_FUEL 0.0000000001  //Fuel burned to fight air drag and road friction.
-#define ACC_FUEL 0.00001    //Fuel burned to accelerate the car
+#define IDLE_FUEL  0.00001   //Fuel spent just running the engine.
+#define SPEED_FUEL 0.0000000000005  //Fuel burned to fight air drag and road friction.
+#define ACC_FUEL 0.0001    //Fuel burned to accelerate the car
 
     lastGas += IDLE_FUEL;
-    if (signedAcceleration > 0) {
-      lastGas += SPEED_FUEL * lastSpeed * lastSpeed * lastSpeed;  //We're fighting drag
-      lastGas += ACC_FUEL;  //And we're adding momentum to the car.
-    }  //else, we're not accelerating, and we're letting drag slow the car.
+    if (signedAcceleration > -0.01) {
+      lastGas += SPEED_FUEL * lastSpeed * lastSpeed * lastSpeed * lastSpeed;  //We're fighting drag
+      if (signedAcceleration > 0.1) {
+        lastGas += ACC_FUEL;  //And we're adding momentum to the car.
+      }
+    }
 
     sendNumericalMessage(NUMERICAL_SIGNALS[10], lastGas, &listener);
 
