@@ -1,48 +1,37 @@
 #include "serialutil.h"
 #include "buffers.h"
 #include "log.h"
-#include "HardwareSerial.h"
+#include "WProgram.h"
+
+#undef BYTE
+#include <plib.h>
 
 #define UART_BAUDRATE 115200
-
-extern HardwareSerial Serial1;
+#define GetPeripheralClock() (80000000ul)
 
 // TODO see if we can do this with interrupts on the chipKIT
 // http://www.chipkit.org/forum/viewtopic.php?f=7&t=1088
 void readFromSerial(SerialDevice* device, bool (*callback)(uint8_t*)) {
     if(device != NULL) {
-        int bytesAvailable = ((HardwareSerial*)device->controller)->available();
-        if(bytesAvailable > 0) {
-            for(int i = 0; i < bytesAvailable &&
-                    !QUEUE_FULL(uint8_t, &device->receiveQueue); i++) {
-                char byte = ((HardwareSerial*)device->controller)->read();
-                QUEUE_PUSH(uint8_t, &device->receiveQueue, (uint8_t) byte);
-            }
-            processQueue(&device->receiveQueue, callback);
-        }
     }
 }
 
 void initializeSerial(SerialDevice* device) {
     if(device != NULL) {
         initializeSerialCommon(device);
-        device->controller = &Serial1;
-        ((HardwareSerial*)device->controller)->begin(UART_BAUDRATE);
+        // UARTConfigure(UART2, UART_ENABLE_PINS_CTS_RTS);
+        UARTConfigure(UART2, UART_ENABLE_PINS_TX_RX_ONLY);
+        UARTSetFifoMode(UART2, (UART_FIFO_MODE)(UART_INTERRUPT_ON_TX_NOT_FULL | UART_INTERRUPT_ON_RX_NOT_EMPTY));
+        UARTSetLineControl(UART2, (UART_LINE_CONTROL_MODE)(UART_DATA_SIZE_8_BITS | UART_PARITY_NONE | UART_STOP_BITS_1));
+        UARTSetDataRate(UART2, GetPeripheralClock(), UART_BAUDRATE);
+        UARTEnable(UART2, (UART_ENABLE_MODE)UART_ENABLE_FLAGS(UART_PERIPHERAL | UART_RX | UART_TX));
     }
 }
 
 // The chipKIT version of this function is blocking. It will entirely flush the
 // send queue before returning.
 void processSerialSendQueue(SerialDevice* device) {
-    int byteCount = 0;
-    char sendBuffer[MAX_MESSAGE_SIZE];
-    while(!QUEUE_EMPTY(uint8_t, &device->sendQueue) &&
-                    byteCount < MAX_MESSAGE_SIZE) {
-        sendBuffer[byteCount++] = QUEUE_POP(uint8_t, &device->sendQueue);
-    }
-
-    if(byteCount > 0) {
-        ((HardwareSerial*)device->controller)->write((const uint8_t*)sendBuffer,
-                byteCount);
-    }
+    while(!UARTTransmitterIsReady(UART2));
+    UARTSendDataByte(UART2, 'b');
+    while(!UARTTransmissionHasCompleted(UART2));
 }
