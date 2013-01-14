@@ -7,6 +7,6 @@ before_install:
     - cd src
 env:
   global:
-    - secure: "KjpqzIbc/kpciyNB7M/Aec2w2BpHQ4F/zVwtvFpOyBNjDPu2HzHeWD7p1A0U\n7+bWR1bb6CppEaS6kxnMmEW4Ff11NM9Wt+OehWtN2zZ63N36arkPLMq+KZi5\ndMhrPnbvSNS3QWB6NYvXv6jrJdHQFunn+EVCLMPba8k6J4ftqVA="
+    secure: "Duzvup1uIyI+GMw22CvQjuQzFL8Y7IebjkOTokOtrKR25qqrZgpRsqqsCO7r\nfIwr4MkKk7r1ZA+WUQNsuegsvrroe1oC9ZSVgSYDcj9H88b6qCPaYafO0L0G\ntlQeoeRzDqSOjKImvLYzD4qlI1+CTA7rG0me+wxZJ3LxuHu3NTs="
 notifications:
   hipchat: <%= ENV['HIPCHAT_TOKEN'] %>@Ford
