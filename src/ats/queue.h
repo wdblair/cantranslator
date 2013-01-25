@@ -41,7 +41,7 @@ extern "C" {
   extern bool queue_empty_01935_##type (void *) ;               \
   extern void queue_snapshot_01936_##type (void *, void *) ;    \
 
-#define QUEUE_PUSH(type, queue, value) queue_push_01928_##type(queue, value)
+#define QUEUE_PUSH(type, queue, value) queue_push_01928_##type((void*)queue, value)
 #define QUEUE_POP(type, queue) queue_pop_01929_##type ((void*)queue)
 #define QUEUE_PEEK(type, queue) queue_peek_01930_##type ((void*)queue)
 #define QUEUE_INIT(type, queue) queue_init_01931_##type ((void*)queue)
