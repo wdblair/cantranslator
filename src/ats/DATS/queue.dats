@@ -1,5 +1,6 @@
 (*
   Queue Implementation - Circular Buffer
+  
 *)
 
 staload "SATS/queue.sats"
@@ -76,19 +77,24 @@ in
   }
 end
 
-(* Need a way for it to generate the templates we want to call from C. *)
+abst@ype uint8_t = $extype "uint8_t"
 
+extern
+castfn uint8_t_int {n:nat} (i: int n ) : uint8_t
+
+(* Need a way for it to generate the templates we want to call from C. *)
 fun dummy () : void = {
-  var q : queue(int, 10) = 
-    $extval(queue(int, 10), "my_queue")
+  var q : queue(uint8_t, 10) =
+    $extval(queue(uint8_t, 10), "my_queue")
   val _ = queue_init(q)
-  val _ = queue_push(q, 10)
+  val _ = queue_push(q, uint8_t_int(10))
   val _ = queue_pop(q)
   val _ = queue_full(q)
   val _ = queue_length(q)
   val _ = queue_available(q)
   val _ = queue_full(q)
   val _ = queue_empty(q)
-  var !buf = @[int][10](0)
+  var !buf = @[uint8_t][10]((uint8_t_int)0)
   val _ = queue_snapshot(q, !buf)
+  val _ = queue_peek(q)
 }

@@ -2,7 +2,7 @@
 #include "strutil.h"
 #include "log.h"
 
-QUEUE_DEFINE(uint8_t)
+//QUEUE_DEFINE(uint8_t)
 
 void processQueue(ByteQueue* queue, bool (*callback)(uint8_t*)) {
     int length = QUEUE_LENGTH(uint8_t, queue);
