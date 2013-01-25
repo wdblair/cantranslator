@@ -29,6 +29,8 @@ ifneq ($(CJSON_EXISTS),0)
 $(error cJSON dependency is missing - run "script/bootstrap.sh")
 endif
 
+PLATFORM=BLUEBOARD
+
 # Valid PLATFORM options:
 # 	CHIPKIT
 # 	BLUEBOARD
