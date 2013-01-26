@@ -15,31 +15,31 @@ extern "C" {
 
 #define QUEUE_TYPE(type) queue_##type##_t
 
-#define QUEUE_DECLARE(type, max_length)                         \
-                                                                \
-  typedef struct {                                              \
-    int head;                                                   \
-    int tail;                                                   \
-    int max;                                                    \
-    type elements[max_length];                                  \
-  } queue_##type##_t;                                           \
-                                                                \
-  extern void queue_init_01931_##type (void *);                 \
-                                                                \
-  extern bool queue_push_01928_##type (void *, type);           \
-                                                                \
-  extern type queue_pop_01929_##type (void *);                  \
-                                                                \
-  extern type queue_peek_01930_##type (void *);                 \
-                                                                \
-  extern bool queue_full_01934_##type (void *);                 \
-                                                                \
-  extern int queue_length_01932_##type (void *) ;               \
-                                                                \
-  extern int queue_available_01933_##type (void *) ;            \
-  extern bool queue_full_01934_##type(void *) ;                 \
-  extern bool queue_empty_01935_##type (void *) ;               \
-  extern void queue_snapshot_01936_##type (void *, void *) ;    \
+#define QUEUE_DECLARE(type, max_length)                 \
+                                                        \
+  typedef struct {                                      \
+    int head;                                           \
+    int tail;                                           \
+    int max;                                            \
+    type elements[max_length];                          \
+  } queue_##type##_t;                                   \
+                                                        \
+  void queue_init_01931_##type (void *);                \
+                                                        \
+  bool queue_push_01928_##type (void *, type);          \
+                                                        \
+  type queue_pop_01929_##type (void *);                 \
+                                                        \
+  type queue_peek_01930_##type (void *);                \
+                                                        \
+  bool queue_full_01934_##type (void *);                \
+                                                        \
+  int queue_length_01932_##type (void *) ;              \
+                                                        \
+  int queue_available_01933_##type (void *) ;           \
+  bool queue_full_01934_##type(void *) ;                \
+  bool queue_empty_01935_##type (void *) ;              \
+  void queue_snapshot_01936_##type (void *, void *) ;   \
 
 #define QUEUE_PUSH(type, queue, value) queue_push_01928_##type((void*)queue, value)
 #define QUEUE_POP(type, queue) queue_pop_01929_##type ((void*)queue)
@@ -51,5 +51,8 @@ extern "C" {
 #define QUEUE_EMPTY(type, queue) queue_empty_01935_##type((void*)queue)
 #define QUEUE_SNAPSHOT(type, queue, snapshot) queue_snapshot_01936_##type((void*)queue, (void*)snapshot)
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

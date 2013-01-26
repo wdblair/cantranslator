@@ -1,7 +1,7 @@
 #include "canwrite.h"
 #include "log.h"
 
-QUEUE_DEFINE(CanMessage);
+//QUEUE_DEFINE(CanMessage);
 
 void checkWritePermission(CanSignal* signal, bool* send) {
     if(!signal->writable) {

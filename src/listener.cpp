@@ -1,4 +1,4 @@
-#include "queue.h"
+#include "ats/queue.h"
 #include "listener.h"
 #include "log.h"
 #include "buffers.h"
@@ -23,12 +23,12 @@ void sendMessage(Listener* listener, uint8_t* message, int messageSize) {
 void processListenerQueues(Listener* listener) {
     // Must always process USB, because this function usually runs the MCU's USB
     // task that handles SETUP and enumeration.
-    processUsbSendQueue(listener->usb);
-    if(listener->serial != NULL) {
-        processSerialSendQueue(listener->serial);
-    }
-
-    if(listener->ethernet != NULL) {
-       processEthernetSendQueue(listener->ethernet);
-    }
+  processUsbSendQueue(listener->usb);
+  if(listener->serial != NULL) {
+    processSerialSendQueue(listener->serial);
+  }
+  
+  if(listener->ethernet != NULL) {
+    processEthernetSendQueue(listener->ethernet);
+  }
 }
