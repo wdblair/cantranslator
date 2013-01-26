@@ -1,6 +1,6 @@
 #include <check.h>
 #include <stdint.h>
-#include "queue.h"
+#include "ats/queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 

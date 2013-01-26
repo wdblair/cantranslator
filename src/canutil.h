@@ -22,7 +22,15 @@ typedef struct {
     uint64_t data;
 } CanMessage;
 
-QUEUE_DECLARE(CanMessage, 16);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+QUEUE_DECLARE(CanMessage, 16)
+
+#ifdef __cplusplus
+}
+#endif
 
 /* Public: A container for a CAN module paried with a certain bus.
  *

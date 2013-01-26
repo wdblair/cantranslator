@@ -40,5 +40,5 @@ fun {a:t@ype} queue_empty {max: pos} (
 ) : bool 
 
 fun {a:t@ype} queue_snapshot{max: pos} {snap:nat | snap >= max} (
-  q: &queue(a, max) , snapshot : &(@[a][snap])
+  q: &queue(a, max) , snapshot : &(@[a?][snap])
 ) : void

@@ -198,7 +198,7 @@ void translateCanSignal(Listener* listener, CanSignal* signal,
 }
 
 void translateCanSignal(Listener* listener, CanSignal* signal,
-        uint64_t data, CanSignal* signals, int signalCount) {
-    translateCanSignal(listener, signal, data, passthroughHandler, signals,
-            signalCount);
+                        uint64_t data, CanSignal* signals, int signalCount) {
+  translateCanSignal(listener, signal, data, passthroughHandler, signals,
+                     signalCount);
 }

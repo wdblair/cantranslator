@@ -98,6 +98,7 @@ void queue_##type##_snapshot(queue_##type* queue, type* snapshot) { \
 #define QUEUE_SNAPSHOT(type, queue, snapshot) queue_##type##_snapshot(queue, \
         snapshot)
 
+
 #ifdef __cplusplus
 }
 #endif
