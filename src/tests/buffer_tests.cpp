@@ -22,24 +22,25 @@ bool callback(uint8_t* message) {
 
 START_TEST (test_empty_doesnt_call)
 {
-    processQueue(&queue, callback);
-    fail_if(called);
+  processQueue(&queue, callback);
+  fail_if(called);
 }
 END_TEST
 
 START_TEST (test_missing_callback)
 {
-    QUEUE_PUSH(uint8_t, &queue, (uint8_t) 128);
-    processQueue(&queue, NULL);
-    fail_if(called);
-    fail_if(QUEUE_EMPTY(uint8_t, &queue));
+  QUEUE_PUSH(uint8_t, &queue, (uint8_t) 128);
+  processQueue(&queue, NULL);
+  fail_if(called);
+  fail_if(QUEUE_EMPTY(uint8_t, &queue));
 }
 END_TEST
 
 START_TEST (test_success_clears)
 {
     callbackStatus = true;
-    QUEUE_PUSH(uint8_t, &queue, (uint8_t) 128);
+    bool foo = QUEUE_PUSH(uint8_t, &queue, (uint8_t) 128);
+    fail_unless(foo);
     processQueue(&queue, callback);
     fail_unless(called);
     fail_unless(QUEUE_EMPTY(uint8_t, &queue));

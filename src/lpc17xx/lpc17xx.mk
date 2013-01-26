@@ -21,7 +21,7 @@ CC_FLAGS = -c -fno-common -fmessage-length=0 -Wall -fno-exceptions \
 		   -Wno-char-subscripts -Wno-unused-but-set-variable -Wno-unused-label -Wno-unused-function -Werror
 ONLY_C_FLAGS = -std=gnu99
 ONLY_CPP_FLAGS = -std=gnu++0x
-CC_SYMBOLS += -DTOOLCHAIN_GCC_ARM -DUSB_DEVICE_ONLY -D__LPC17XX__ -DBOARD=9 -D_ATS_HEADER_NONE -D_ATS_PRELUDE_NONE
+CC_SYMBOLS += -DTOOLCHAIN_GCC_ARM -DUSB_DEVICE_ONLY -D__LPC17XX__ -DBOARD=9 -D_ATS_HEADER_NONE -D_ATS_PRELUDE_NONE -D_ATS_AVR
 
 ifeq ($(PLATFORM), BLUEBOARD)
 CC_SYMBOLS += -DBLUEBOARD

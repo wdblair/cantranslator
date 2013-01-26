@@ -11,8 +11,8 @@ TESTS=$(patsubst %.cpp,$(TEST_OBJDIR)/%.bin,$(TEST_SRC))
 TEST_LIBS = -lcheck
 INCLUDE_PATHS += -I. -I./libs/cJSON
 
-TESTABLE_OBJ_FILES = bitfield.o queue.o canutil.o canwrite.o canread.o \
-				listener.o libs/cJSON/cJSON.o buffers.o strutil.o usbutil.o \
+TESTABLE_OBJ_FILES = bitfield.o queue.o queue_dats.o canutil.o canwrite.o \
+			canread.o listener.o libs/cJSON/cJSON.o buffers.o strutil.o usbutil.o \
 				serialutil.o ethernetutil.o
 TESTABLE_LIB_SRCS = usbutil_mock.c serialutil_mock.c \
 				canwrite_mock.c log_mock.c ethernetutil_mock.c
@@ -66,7 +66,7 @@ unit_tests: LD = $(TEST_LD)
 unit_tests: CC = $(TEST_CC)
 unit_tests: CPP = $(TEST_CPP)
 unit_tests: CC_FLAGS = -I. -c -w -Wall -Werror -g -ggdb -coverage
-unit_tests: CC_SYMBOLS = -D__TESTS__
+unit_tests: CC_SYMBOLS = -D__TESTS__ -D_ATS_HEADER_NONE -D_ATS_PRELUDE_NONE -D_ATS_AVR
 unit_tests: LDFLAGS = -lm -coverage
 unit_tests: LDLIBS = $(TEST_LIBS)
 unit_tests: $(TESTS)

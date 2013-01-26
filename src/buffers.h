@@ -8,7 +8,7 @@ extern "C" {
 #include "ats/queue.h"
 
 #define ByteQueue QUEUE_TYPE(uint8_t)
-
+  
 QUEUE_DECLARE(uint8_t, 512)
 
 /* Public: Pass the buffer in the queue to the callback, which should return

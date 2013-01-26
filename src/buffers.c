@@ -9,7 +9,7 @@ void processQueue(ByteQueue* queue, bool (*callback)(uint8_t*)) {
     if(length == 0) {
         return;
     }
-
+    
     uint8_t snapshot[length];
     QUEUE_SNAPSHOT(uint8_t, queue, snapshot);
     if(callback == NULL) {
