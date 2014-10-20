@@ -19,11 +19,6 @@ typedef struct {
 } CanMessage;
 
 typedef struct {
-    int i;
-    char bytes[8];
-} test_t;
-
- typedef struct {
    int head;
    int tail;
    char elements[];
@@ -46,16 +41,10 @@ assume queue (a:t@ype) =
     elements= @[a][max]
   }
   
-extern
-castfn  max_length_int{a:t@ype} {n:nat} (
-  n: int n
-) : max_length(a, n)
-
 implement {a} queue_push (q, itm) = let
-  val len = queue_max_length()
-  prval () = array_length_lemma(len, q.elements)
-  val max = length_to_int(len)
-  val nxt = (q.head + 1) nmod (max)
+  val max = queue_max_length()
+  prval () = array_length_lemma(max, q.elements)
+  val nxt = (q.head + 1) nmod (int) max
 in
   if nxt = q.tail then
     false
@@ -66,10 +55,9 @@ in
 end
 
 implement {a} queue_pop (q) = itm where {
-  val len = queue_max_length()
-  prval () = array_length_lemma(len, q.elements)
-  val max = length_to_int(len)
-  val nxt = (q.tail + 1) nmod (max)
+  val max = queue_max_length()
+  prval () = array_length_lemma(max, q.elements)
+  val nxt = (q.tail + 1) nmod (int) max
   val itm = q.elements.[q.tail]
   val () = q.tail := nxt
 }
@@ -86,9 +74,8 @@ implement {a} queue_init (q) = {
 implement {a} queue_length (q) = len where {
   val len = queue_max_length()
   prval () = array_length_lemma(len, q.elements)
-  val max = length_to_int(len)
   val diff = q.head - q.tail
-  val len = (max + diff) nmod max
+  val len = (max + diff) nmod (int) len
 }
 
 implement {a} queue_empty (q) =
@@ -125,13 +112,17 @@ implement {a} queue_snapshot {snap} (
     fun loop {index: nat | index < snap} (
       i: int index, q: &queue(a), arr: &(@[a?][snap])
     ) : void = let
-        val len = queue_length(q)
+      val len = queue_length(q)
+    let
         val capacity = queue_max_length()
-        val max = length_to_int(capacity)
+        val len = queue_length(q) 
+//        
         prval () =
           array_length_lemma(capacity, q.elements)
-        prval () = array_equal_lemma(q, capacity, len, arr)
-        val nxt = (q.tail + i) nmod max
+        prval () = 
+          array_equal_lemma(q, capacity, len, arr)
+//        
+        val nxt = (q.tail + i) nmod (int) capacity
         val () =  arr.[i] := q.elements.[nxt]
     in
       if i+1 >= len then
@@ -152,13 +143,14 @@ fun get_queue{a:t@ype} ()
 
 abst@ype uint8_t = $extype "uint8_t"
 
-abst@ype normal_int = $extype "int"
-
 abst@ype can_message = $extype "CanMessage"
 
-abst@ype test_t = $extype "test_t"
+//It'd be nice to defer these functions to C.
 
-//It'd be nice to defere these functions to C.
+extern
+castfn  max_length_int{a:t@ype} {n:nat} (
+  n: int n
+) : max_length(a, n)
 
 implement queue_max_length<uint8_t>() = max_length_int(513)
 

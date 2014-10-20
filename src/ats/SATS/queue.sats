@@ -12,9 +12,13 @@ praxi  array_length_lemma {a:t@ype} {len:pos} {sz:pos} (
   max: max_length(a, len), data: @[a][sz]
 ) : [len == sz] void
 
+symintr int
+
 castfn  length_to_int {a:t@ype} {len:nat} (
   len: max_length(a, len)
 ) : int len
+
+overload int with length_to_int
 
 fun {a:t@ype} queue_max_length ()
   : [m:pos] max_length(a, m)
